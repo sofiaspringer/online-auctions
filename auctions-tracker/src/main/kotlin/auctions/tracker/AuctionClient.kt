@@ -1,16 +1,39 @@
 package auctions.tracker
 
-import org.http4k.core.HttpHandler
+import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
+import org.http4k.core.Uri
+import org.http4k.format.Jackson.asJsonObject
+import org.http4k.format.Jackson.elements
 
 class AuctionClient(val handler: (Request) -> Response) {
 
     fun auctionsCatalog(): AuctionsCatalog {
-        TODO()
-        //val request = Request.get("api")
-        //   val response = handler(request)
-        //    return AuctionsCatalog()
-        // }
+        val request = Request(
+            method = Method.GET,
+            uri = Uri.of(value = "www.example.com"),
+        )
+        val response = handler(request)
+
+        val jsonObject = response.bodyString().asJsonObject()
+
+        val jsonNodes = elements(jsonObject)
+
+        return AuctionsCatalog(
+            auctions = jsonNodes.map { it ->
+
+                val textValue = it.path("status").textValue()
+                val mappedStatus = if (textValue == "FINISHED") {
+                    "COMPLETED"
+                } else textValue
+
+                Auction(
+                    name = it.path("name").textValue(),
+                    status = AuctionStatus.valueOf(mappedStatus)
+                )
+            }
+        )
     }
 }
+

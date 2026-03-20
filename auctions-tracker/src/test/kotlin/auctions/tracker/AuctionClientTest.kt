@@ -1,11 +1,11 @@
 package auctions.tracker
 
-import org.http4k.core.HttpHandler
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
 
 class AuctionClientTest {
     @Test
@@ -45,19 +45,5 @@ class AuctionClientTest {
         )), result)
     }
 
-    @Test
-    fun test(){
-        val bob = Bob({ "Bob" }, "da Silva")
-        assertEquals("Bob da Silva", bob.fullName())
-    }
-}
-
-class Bob(
-    val firstName: () -> String,
-    val lastName: String
-){
-    fun fullName(): String{
-        return firstName() + lastName
-    }
 }
 
