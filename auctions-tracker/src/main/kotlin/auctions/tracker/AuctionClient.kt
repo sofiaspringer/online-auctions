@@ -3,6 +3,7 @@ package auctions.tracker
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
+import org.http4k.core.Status
 import org.http4k.core.Uri
 import org.http4k.format.Jackson.asJsonObject
 import org.http4k.format.Jackson.elements
@@ -16,12 +17,15 @@ class AuctionClient(val handler: (Request) -> Response) {
         )
         val response = handler(request)
 
+        if (response.status == Status.NOT_FOUND)
+            return AuctionsCatalog(emptyList())
+
         val jsonObject = response.bodyString().asJsonObject()
 
         val jsonNodes = elements(jsonObject)
 
         return AuctionsCatalog(
-            auctions = jsonNodes.map { it ->
+            auctions = jsonNodes.map {
 
                 val textValue = it.path("status").textValue()
                 val mappedStatus = if (textValue == "FINISHED") {
@@ -34,6 +38,7 @@ class AuctionClient(val handler: (Request) -> Response) {
                 )
             }
         )
+
     }
 }
 
