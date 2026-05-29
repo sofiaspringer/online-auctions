@@ -11,7 +11,9 @@ import kotlin.test.assertEquals
 class AuctionClientTest {
     @Test
     fun `reads auctions catalog`() {
-        val handler = { _: Request -> Response(Status.OK).body("""
+        val handler = { _: Request ->
+            Response(Status.OK).body(
+                """
             [
               {
                 "name": "Auction for pools",
@@ -32,23 +34,28 @@ class AuctionClientTest {
                 "status": "NOT_STARTED"
               }
             ]
-        """.trimIndent())
+        """.trimIndent()
+            )
         }
 
         val client = AuctionClient(handler)
 
         val result = client.auctionsCatalog()
 
-        assertEquals(AuctionsCatalog(listOf(
-            Auction("Auction for pools", AuctionStatus.COMPLETED),
-            Auction("Auction for fancy paintings", AuctionStatus.IN_PROGRESS),
-            Auction("Auction for shows", AuctionStatus.NOT_STARTED),
-        )), result)
+        assertEquals(
+            AuctionsCatalog(
+                listOf(
+                    Auction("Auction for pools", AuctionStatus.COMPLETED),
+                    Auction("Auction for fancy paintings", AuctionStatus.IN_PROGRESS),
+                    Auction("Auction for shows", AuctionStatus.NOT_STARTED),
+                )
+            ), result
+        )
     }
 
     @Test
     fun `returns empty list when response is not found`() {
-        val handler = { _: Request -> Response(Status.NOT_FOUND)}
+        val handler = { _: Request -> Response(Status.NOT_FOUND) }
 
         val client = AuctionClient(handler)
 
@@ -69,7 +76,8 @@ class AuctionClientTest {
         val handler = { request: Request ->
             actualRequest.add(request)
 
-            Response(Status.OK).body("""
+            Response(Status.OK).body(
+                """
             [
               {
                 "name": "Auction for pools",
@@ -90,7 +98,8 @@ class AuctionClientTest {
                 "status": "NOT_STARTED"
               }
             ]
-        """.trimIndent())
+        """.trimIndent()
+            )
         }
 
         val client = AuctionClient(handler)
@@ -99,8 +108,37 @@ class AuctionClientTest {
 
         assertEquals(expectedRequest, actualRequest.single())
 
+    }
+
+    @Test
+    fun `monitors response from server`() {
+        val handler = { request: Request ->
+            Response(status = Status.OK).body(
+                """
+            [
+              {
+                "name": "Auction for pools",
+                "startDate": "2025-11-08",
+                "endDate": "2025-01-08",
+                "status": "FINISHED"
+              },
+              ]
+              """.trimIndent()
+            )
+        }
+
+        val client = AuctionClient(handler = handler)
+
+        client.auctionsCatalog()
+
+
 
     }
 
-}
+    class InMemoryMonitoring : Monitoring {
+        override fun notify(log: Log) {
 
+        }
+    }
+
+}

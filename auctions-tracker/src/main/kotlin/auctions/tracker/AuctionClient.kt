@@ -1,14 +1,10 @@
 package auctions.tracker
 
-import org.http4k.core.Method
-import org.http4k.core.Request
-import org.http4k.core.Response
-import org.http4k.core.Status
-import org.http4k.core.Uri
+import org.http4k.core.*
 import org.http4k.format.Jackson.asJsonObject
 import org.http4k.format.Jackson.elements
 
-class AuctionClient(val handler: (Request) -> Response) {
+class AuctionClient(val handler: HttpHandler) {
 
     fun auctionsCatalog(): AuctionsCatalog {
         val request = Request(
@@ -41,4 +37,10 @@ class AuctionClient(val handler: (Request) -> Response) {
 
     }
 }
+
+interface Monitoring {
+    fun notify(log: Log)
+}
+
+data class Log(val message: String)
 
