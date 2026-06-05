@@ -6,7 +6,8 @@ import org.http4k.format.Jackson.elements
 
 class AuctionClient(
     val handler: HttpHandler,
-    val host: String
+    val host: String,
+    val monitoring: Monitoring
 ) {
 
     fun auctionsCatalog(): AuctionsCatalog {
@@ -15,6 +16,8 @@ class AuctionClient(
             uri = Uri.of(value = "$host/catalog"),
         )
         val response = handler(request)
+
+        monitoring.notify(Log("Response status is: " + response.status))
 
         if (response.status == Status.NOT_FOUND)
             return AuctionsCatalog(emptyList())

@@ -4,7 +4,6 @@ import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
-import org.junit.jupiter.api.Disabled
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -40,7 +39,7 @@ class AuctionClientTest {
             )
         }
 
-        val client = AuctionClient(handler, "host")
+        val client = AuctionClient(handler, "host", NoOp)
 
         val result = client.auctionsCatalog()
 
@@ -59,7 +58,7 @@ class AuctionClientTest {
     fun `returns empty list when response is not found`() {
         val handler = { _: Request -> Response(Status.NOT_FOUND) }
 
-        val client = AuctionClient(handler, "host")
+        val client = AuctionClient(handler, "host", NoOp)
 
         val result = client.auctionsCatalog()
 
@@ -74,8 +73,7 @@ class AuctionClientTest {
         val randomHost = "random.host." + Random.nextInt().toString()
 
         val expectedRequest = Request(
-            method = Method.GET,
-            uri = "$randomHost/catalog"
+            method = Method.GET, uri = "$randomHost/catalog"
         )
 
         val handler = { request: Request ->
@@ -107,7 +105,7 @@ class AuctionClientTest {
             )
         }
 
-        val client = AuctionClient(handler, randomHost)
+        val client = AuctionClient(handler, randomHost, NoOp)
 
         client.auctionsCatalog()
 
@@ -115,10 +113,13 @@ class AuctionClientTest {
 
     }
 
-    @Disabled
     @Test
     fun `monitors response from server`() {
-        val handler = { request: Request ->
+        val expectedLog = Log("Response status is: " + Status.OK.toString())
+
+        val actualLog = mutableListOf<Log>()
+
+        val server = { request: Request ->
             Response(status = Status.OK).body(
                 """
             [
@@ -127,23 +128,29 @@ class AuctionClientTest {
                 "startDate": "2025-11-08",
                 "endDate": "2025-01-08",
                 "status": "FINISHED"
-              },
+              }
               ]
               """.trimIndent()
             )
         }
 
-        val client = AuctionClient(handler = handler, "host")
+        val httpClient = { request: Request -> server(request) }
+
+        val client = AuctionClient(handler = httpClient, "host", InMemoryMonitoring(actualLog))
 
         client.auctionsCatalog()
 
-
-
+        assertEquals(expectedLog, actualLog.single())
     }
 
-    class InMemoryMonitoring : Monitoring {
+    class InMemoryMonitoring(val logList: MutableList<Log>) : Monitoring {
         override fun notify(log: Log) {
+            logList.add(log)
+        }
+    }
 
+    object NoOp : Monitoring {
+        override fun notify(log: Log) {
         }
     }
 
