@@ -4,12 +4,15 @@ import org.http4k.core.*
 import org.http4k.format.Jackson.asJsonObject
 import org.http4k.format.Jackson.elements
 
-class AuctionClient(val handler: HttpHandler) {
+class AuctionClient(
+    val handler: HttpHandler,
+    val host: String
+) {
 
     fun auctionsCatalog(): AuctionsCatalog {
         val request = Request(
             method = Method.GET,
-            uri = Uri.of(value = "www.example.com"),
+            uri = Uri.of(value = "$host/catalog"),
         )
         val response = handler(request)
 

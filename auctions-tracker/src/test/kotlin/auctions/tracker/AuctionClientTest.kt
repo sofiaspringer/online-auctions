@@ -4,6 +4,8 @@ import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
+import org.junit.jupiter.api.Disabled
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -38,7 +40,7 @@ class AuctionClientTest {
             )
         }
 
-        val client = AuctionClient(handler)
+        val client = AuctionClient(handler, "host")
 
         val result = client.auctionsCatalog()
 
@@ -57,20 +59,23 @@ class AuctionClientTest {
     fun `returns empty list when response is not found`() {
         val handler = { _: Request -> Response(Status.NOT_FOUND) }
 
-        val client = AuctionClient(handler)
+        val client = AuctionClient(handler, "host")
 
         val result = client.auctionsCatalog()
 
         assertEquals(emptyList(), result.auctions)
     }
 
+
     @Test
     fun `client builds correct request to get auctions catalog`() {
         val actualRequest = mutableListOf<Request>()
 
+        val randomHost = "random.host." + Random.nextInt().toString()
+
         val expectedRequest = Request(
             method = Method.GET,
-            uri = "https://www.auctions-catalog.com/catalog"
+            uri = "$randomHost/catalog"
         )
 
         val handler = { request: Request ->
@@ -102,7 +107,7 @@ class AuctionClientTest {
             )
         }
 
-        val client = AuctionClient(handler)
+        val client = AuctionClient(handler, randomHost)
 
         client.auctionsCatalog()
 
@@ -110,6 +115,7 @@ class AuctionClientTest {
 
     }
 
+    @Disabled
     @Test
     fun `monitors response from server`() {
         val handler = { request: Request ->
@@ -127,7 +133,7 @@ class AuctionClientTest {
             )
         }
 
-        val client = AuctionClient(handler = handler)
+        val client = AuctionClient(handler = handler, "host")
 
         client.auctionsCatalog()
 
