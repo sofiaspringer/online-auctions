@@ -13,6 +13,25 @@ class OutcomeTests {
 
         assertEquals(Success(expected), mappedSuccess)
     }
+
+    @Test
+    fun `map success with value` () {
+        val initialResult = "this is a success" + Random.nextInt().toString()
+
+        val success = Success(initialResult )
+            .outcomeMap({it + "nope"})
+
+        assertEquals(Success(initialResult + "nope"), success)
+    }
+
+    @Test
+    fun `test`() {
+       val failureOutput = Failure("this is a failure")
+           .outcomeMap({"nope"})
+
+        assertEquals(Failure("this is a failure"), failureOutput)
+
+    }
 }
 
 

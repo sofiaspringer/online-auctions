@@ -1,4 +1,4 @@
-package auctions
+package exercises
 
 class Greetings(val formal: Boolean) {
 
