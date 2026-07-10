@@ -1,36 +1,26 @@
 package exercises
 
-import kotlin.random.Random
-import kotlin.test.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import kotlin.test.assertEquals
 
 class OutcomeTests {
-    @Test
-    fun `map success`() {
-        val expected = "new value" + Random.nextInt().toString()
-        val mappedSuccess = Success("this is a success")
-            .outcomeMap({ expected })
-
-        assertEquals(Success(expected), mappedSuccess)
+    @ParameterizedTest
+    @MethodSource("outcomes")
+    fun `mapping only successes`(outcome: Outcome, expectedResult: Outcome){
+        val result = outcome.outcomeMap({ "$it nope" })
+        assertEquals(expectedResult, result)
     }
 
-    @Test
-    fun `map success with value` () {
-        val initialResult = "this is a success" + Random.nextInt().toString()
-
-        val success = Success(initialResult )
-            .outcomeMap({it + "nope"})
-
-        assertEquals(Success(initialResult + "nope"), success)
-    }
-
-    @Test
-    fun `test`() {
-       val failureOutput = Failure("this is a failure")
-           .outcomeMap({"nope"})
-
-        assertEquals(Failure("this is a failure"), failureOutput)
-
+    companion object {
+        @JvmStatic
+        private fun outcomes(): Set<Arguments?> {
+            return setOf(
+                Arguments.of(Success("this is a success"), Success("this is a success nope")),
+                Arguments.of(Failure("this is a failure"), Failure("this is a failure")),
+            )
+        }
     }
 }
 

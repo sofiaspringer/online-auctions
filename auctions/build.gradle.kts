@@ -21,6 +21,7 @@ dependencies {
         implementation("org.http4k:http4k-format-moshi")
 
         testImplementation(kotlin("test"))
+        testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.0")
     }
 }
 

@@ -2,15 +2,12 @@ package exercises
 
 sealed class Outcome
 
-data class Success(val value: String): Outcome()
+data class Success(val value: String) : Outcome()
 
-
-fun Success.outcomeMap(f: (String) -> String): Success{
-    return Success( f(value))
+fun Outcome.outcomeMap(f: (String) -> String): Outcome {
+    return if (this is Success)
+        Success(f(value))
+    else this
 }
 
-fun Failure.outcomeMap(f: (String) -> String): Failure{
-    return Failure( f(value))
-}
-
-data class Failure(val value: String): Outcome()
+data class Failure(val value: String) : Outcome()
